@@ -25,8 +25,26 @@ class NoteRepository(
         return try {
             val response = api.search("*")
             if (response.isSuccessful && response.body() != null) {
-                val entities = response.body()!!.map { it.toEntity() }
-                noteDao.upsertAll(entities)
+                val existingNotes = noteDao.getAllNotesList()
+                val existingByTitle = existingNotes.associateBy { it.title }
+
+                for (result in response.body()!!) {
+                    val existing = existingByTitle[result.title]
+                    if (existing != null && existing.content.isNotBlank() && !existing.isDeleted) {
+                        noteDao.upsertNote(
+                            NoteEntity(
+                                title = existing.title,
+                                content = existing.content,
+                                lastModified = result.lastModified,
+                                isDirty = existing.isDirty,
+                                isDeleted = false
+                            )
+                        )
+                    } else if (existing?.isDeleted != true) {
+                        noteDao.upsertNote(result.toEntity())
+                    }
+                }
+
                 noteDao.cleanSyncedDeletions()
                 NetworkResult.Success(Unit)
             } else {
@@ -109,6 +127,10 @@ class NoteRepository(
                 isDirty = true
             )
         )
+    }
+
+    suspend fun markLocalDeleted(title: String) {
+        noteDao.markDeleted(title)
     }
 
     suspend fun searchRemote(term: String): NetworkResult<List<SearchResultDto>> {

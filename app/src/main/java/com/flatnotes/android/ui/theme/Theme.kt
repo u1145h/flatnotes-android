@@ -10,7 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -31,6 +31,7 @@ private val LightColorScheme = lightColorScheme(
 fun FlatnotesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
+    isAmoled: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -42,17 +43,32 @@ fun FlatnotesTheme(
         else -> LightColorScheme
     }
 
+    val amoledColorScheme = if (isAmoled && darkTheme) {
+        colorScheme.copy(
+            surface = Color.Black,
+            background = Color.Black,
+            surfaceContainerLow = Color.Black,
+            surfaceContainer = Color.Black,
+            surfaceContainerHigh = Color(0xFF0A0A0A),
+            surfaceContainerHighest = Color(0xFF141414),
+            surfaceVariant = Color(0xFF1C1B1F),
+            outline = Color(0xFF444444),
+            outlineVariant = Color(0xFF333333)
+        )
+    } else {
+        colorScheme
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = amoledColorScheme,
         typography = Typography,
         content = content
     )

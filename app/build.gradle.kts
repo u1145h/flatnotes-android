@@ -84,5 +84,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation("com.github.jeziellago:compose-markdown:0.7.0")
+
     debugImplementation(libs.androidx.ui.tooling)
 }

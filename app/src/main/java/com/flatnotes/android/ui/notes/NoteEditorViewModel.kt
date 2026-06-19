@@ -45,7 +45,8 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.update { it.copy(isLoading = true, isNewNote = false) }
 
             val local = noteRepository.getLocalNote(title)
-            if (local != null) {
+
+            if (local != null && local.content.isNotBlank()) {
                 _uiState.update {
                     it.copy(
                         title = local.title,
@@ -54,26 +55,49 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
                         isLoading = false
                     )
                 }
-            } else {
-                when (val result = noteRepository.getRemoteNote(title)) {
-                    is NetworkResult.Success -> {
-                        val note = result.data
-                        _uiState.update {
-                            it.copy(
+                return@launch
+            }
+
+            when (val result = noteRepository.getRemoteNote(title)) {
+                is NetworkResult.Success -> {
+                    val note = result.data
+                    if (local != null) {
+                        dao.upsertNote(
+                            com.flatnotes.android.data.local.NoteEntity(
                                 title = note.title,
                                 content = note.content ?: "",
-                                originalTitle = note.title,
+                                lastModified = note.lastModified,
+                                isDirty = false,
+                                isDeleted = false
+                            )
+                        )
+                    }
+                    _uiState.update {
+                        it.copy(
+                            title = note.title,
+                            content = note.content ?: "",
+                            originalTitle = note.title,
+                            isLoading = false
+                        )
+                    }
+                }
+                is NetworkResult.Error -> {
+                    if (local != null) {
+                        _uiState.update {
+                            it.copy(
+                                title = local.title,
+                                content = local.content,
+                                originalTitle = local.title,
                                 isLoading = false
                             )
                         }
-                    }
-                    is NetworkResult.Error -> {
+                    } else {
                         _uiState.update {
                             it.copy(isLoading = false, error = result.message)
                         }
                     }
-                    else -> {}
                 }
+                else -> {}
             }
         }
     }
@@ -137,6 +161,15 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
                 }
                 else -> {}
             }
+        }
+    }
+
+    fun deleteNote(onDone: () -> Unit) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true) }
+            noteRepository.deleteNote(_uiState.value.originalTitle)
+            noteRepository.markLocalDeleted(_uiState.value.originalTitle)
+            onDone()
         }
     }
 }

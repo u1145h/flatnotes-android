@@ -38,12 +38,12 @@ class SyncWorker(
     companion object {
         private const val WORK_NAME = "flatnotes_sync"
 
-        fun enqueue(context: Context) {
+        fun enqueue(context: Context, intervalMinutes: Long = 15) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-            val request = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
+            val request = PeriodicWorkRequestBuilder<SyncWorker>(intervalMinutes, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                 .build()
@@ -51,9 +51,14 @@ class SyncWorker(
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(
                     WORK_NAME,
-                    ExistingPeriodicWorkPolicy.KEEP,
+                    ExistingPeriodicWorkPolicy.UPDATE,
                     request
                 )
+        }
+
+        fun reschedule(context: Context, intervalMinutes: Long) {
+            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+            enqueue(context, intervalMinutes)
         }
 
         fun cancel(context: Context) {

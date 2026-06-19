@@ -15,6 +15,10 @@ import com.flatnotes.android.ui.notes.NoteListScreen
 import com.flatnotes.android.ui.notes.NoteListViewModel
 import com.flatnotes.android.ui.server.ServerSetupScreen
 import com.flatnotes.android.ui.server.ServerSetupViewModel
+import com.flatnotes.android.ui.settings.SettingsScreen
+import com.flatnotes.android.ui.settings.SettingsViewModel
+import com.flatnotes.android.ui.settings.SyncSettingsScreen
+import com.flatnotes.android.ui.settings.ThemeSettingsScreen
 
 object Routes {
     const val SERVER_SETUP = "server_setup"
@@ -22,6 +26,9 @@ object Routes {
     const val NOTE_LIST = "note_list"
     const val NOTE_EDITOR = "note_editor/{title}"
     const val NOTE_CREATE = "note_create"
+    const val SETTINGS = "settings"
+    const val SYNC_SETTINGS = "sync_settings"
+    const val THEME_SETTINGS = "theme_settings"
 
     fun noteEditor(title: String) = "note_editor/$title"
 }
@@ -70,6 +77,9 @@ fun NavGraph(
                 onCreateNote = {
                     navController.navigate(Routes.NOTE_CREATE)
                 },
+                onNavigateToSettings = {
+                    navController.navigate(Routes.SETTINGS)
+                },
                 onLogout = {
                     viewModel.logout()
                     navController.navigate(Routes.LOGIN) {
@@ -97,6 +107,32 @@ fun NavGraph(
             NoteEditorScreen(
                 viewModel = viewModel,
                 title = null,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel()
+            SettingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSync = { navController.navigate(Routes.SYNC_SETTINGS) },
+                onNavigateToTheme = { navController.navigate(Routes.THEME_SETTINGS) }
+            )
+        }
+
+        composable(Routes.SYNC_SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel()
+            SyncSettingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.THEME_SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel()
+            ThemeSettingsScreen(
+                viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
