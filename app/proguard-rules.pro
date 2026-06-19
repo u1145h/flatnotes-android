@@ -1,0 +1,1 @@
+-keep class com.flatnotes.android.data.model.** { *; }
