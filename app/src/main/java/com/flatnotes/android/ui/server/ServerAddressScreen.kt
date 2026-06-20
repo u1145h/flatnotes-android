@@ -3,7 +3,6 @@ package com.flatnotes.android.ui.server
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -12,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.flatnotes.android.ui.components.OneUiScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,36 +27,24 @@ fun ServerAddressScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Server Address") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    if (uiState.connectionSuccess) {
-                        IconButton(onClick = viewModel::saveAndExit) {
-                            Icon(Icons.Default.Check, contentDescription = "Save")
-                        }
-                    }
+    OneUiScaffold(
+        title = "Server Address",
+        onBack = onNavigateBack,
+        actions = {
+            if (uiState.connectionSuccess) {
+                IconButton(onClick = viewModel::saveAndExit) {
+                    Icon(Icons.Default.Check, contentDescription = "Save")
                 }
-            )
+            }
         }
-    ) { padding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Change your Flatnotes server address",
-                style = MaterialTheme.typography.titleLarge
-            )
+            Spacer(Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = uiState.serverUrl,

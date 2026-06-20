@@ -2,13 +2,12 @@ package com.flatnotes.android.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.flatnotes.android.ui.components.OneUiScaffold
 
 data class IntervalOption(val label: String, val minutes: Long)
 
@@ -28,31 +27,16 @@ fun SyncSettingsScreen(
 ) {
     val currentInterval by viewModel.syncInterval.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Sync Interval") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    OneUiScaffold(
+        title = "Sync Interval",
+        onBack = onNavigateBack
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "How often to sync notes to the server",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
 
             intervalOptions.forEach { option ->
                 Row(

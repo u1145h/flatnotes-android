@@ -7,6 +7,8 @@ import com.flatnotes.android.data.api.RetrofitClient
 import com.flatnotes.android.data.api.TokenStorage
 import com.flatnotes.android.data.local.FlatnotesDatabase
 import com.flatnotes.android.data.local.NoteEntity
+import com.flatnotes.android.data.model.AppConfig
+import com.flatnotes.android.data.repository.AppConfigRepository
 import com.flatnotes.android.data.repository.NoteRepository
 import com.flatnotes.android.sync.SyncManager
 import com.flatnotes.android.util.NetworkResult
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 
 data class NoteListUiState(
     val notes: List<NoteEntity> = emptyList(),
+    val pinnedTitles: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val isSyncing: Boolean = false,
     val searchQuery: String = "",
@@ -28,6 +31,10 @@ class NoteListViewModel(application: Application) : AndroidViewModel(application
     private val dao = FlatnotesDatabase.getInstance(application).noteDao()
     private val noteRepository: NoteRepository
     private val syncManager: SyncManager
+    private val appConfigRepository: AppConfigRepository
+
+    private var allNotes = emptyList<NoteEntity>()
+    private var pinnedNotes = emptySet<String>()
 
     private val _uiState = MutableStateFlow(NoteListUiState())
     val uiState: StateFlow<NoteListUiState> = _uiState.asStateFlow()
@@ -40,15 +47,55 @@ class NoteListViewModel(application: Application) : AndroidViewModel(application
         )
         noteRepository = NoteRepository(api, dao)
         syncManager = SyncManager(api, dao)
+        appConfigRepository = AppConfigRepository(api, application)
+
+        viewModelScope.launch {
+            val localConfig = appConfigRepository.getLocalConfig()
+            pinnedNotes = localConfig.pinnedNotes.toSet()
+            emitState()
+
+            val serverConfig = appConfigRepository.pullFromServer()
+            pinnedNotes = serverConfig.pinnedNotes.toSet()
+            appConfigRepository.saveLocalConfig(serverConfig)
+            emitState()
+        }
 
         viewModelScope.launch {
             noteRepository.getLocalNotes().collect { notes ->
-                _uiState.update { it.copy(notes = notes) }
+                allNotes = notes
+                emitState()
             }
         }
 
         refreshNotes()
     }
+
+    private fun emitState() {
+        val filtered = allNotes.filter { it.title != AppConfigRepository.CONFIG_NOTE_TITLE }
+        val sorted = filtered.sortedByDescending { it.title in pinnedNotes }
+        _uiState.update {
+            it.copy(
+                notes = sorted,
+                pinnedTitles = pinnedNotes
+            )
+        }
+    }
+
+    fun togglePin(title: String) {
+        viewModelScope.launch {
+            pinnedNotes = if (title in pinnedNotes) {
+                pinnedNotes - title
+            } else {
+                pinnedNotes + title
+            }
+            val config = AppConfig(pinnedNotes = pinnedNotes.toList())
+            appConfigRepository.saveLocalConfig(config)
+            appConfigRepository.pushToServer(config)
+            emitState()
+        }
+    }
+
+    fun isPinned(title: String): Boolean = title in pinnedNotes
 
     fun refreshNotes() {
         viewModelScope.launch {
@@ -84,11 +131,13 @@ class NoteListViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             if (query.isBlank()) {
                 noteRepository.getLocalNotes().collect { notes ->
-                    _uiState.update { it.copy(notes = notes) }
+                    allNotes = notes
+                    emitState()
                 }
             } else {
                 noteRepository.searchLocalNotes(query).collect { notes ->
-                    _uiState.update { it.copy(notes = notes) }
+                    allNotes = notes
+                    emitState()
                 }
             }
         }

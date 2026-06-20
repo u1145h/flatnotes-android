@@ -2,13 +2,12 @@ package com.flatnotes.android.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.flatnotes.android.ui.components.OneUiScaffold
 
 data class ThemeOption(val label: String, val description: String, val key: String)
 
@@ -27,31 +26,16 @@ fun ThemeSettingsScreen(
     val currentTheme by viewModel.themeMode.collectAsState()
     val amoledEnabled by viewModel.amoledEnabled.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Theme") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    OneUiScaffold(
+        title = "Theme",
+        onBack = onNavigateBack
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Choose app appearance",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
 
             themeOptions.forEach { option ->
                 Row(

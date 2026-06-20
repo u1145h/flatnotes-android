@@ -6,16 +6,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteDao {
 
-    @Query("SELECT * FROM notes WHERE is_deleted = 0 ORDER BY last_modified DESC")
+    @Query("SELECT * FROM notes WHERE is_deleted = 0 AND title != '_flatnotes_config' ORDER BY last_modified DESC")
     fun getAllNotes(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE is_deleted = 0 ORDER BY last_modified DESC")
+    @Query("SELECT * FROM notes WHERE is_deleted = 0 AND title != '_flatnotes_config' ORDER BY last_modified DESC")
     suspend fun getAllNotesList(): List<NoteEntity>
 
     @Query("SELECT * FROM notes WHERE title = :title LIMIT 1")
     suspend fun getNoteByTitle(title: String): NoteEntity?
 
-    @Query("SELECT * FROM notes WHERE is_deleted = 0 AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY last_modified DESC")
+    @Query("SELECT * FROM notes WHERE is_deleted = 0 AND title != '_flatnotes_config' AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY last_modified DESC")
     fun searchNotes(query: String): Flow<List<NoteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

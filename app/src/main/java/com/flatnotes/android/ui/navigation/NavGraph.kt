@@ -13,6 +13,7 @@ import com.flatnotes.android.ui.notes.NoteEditorScreen
 import com.flatnotes.android.ui.notes.NoteEditorViewModel
 import com.flatnotes.android.ui.notes.NoteListScreen
 import com.flatnotes.android.ui.notes.NoteListViewModel
+import com.flatnotes.android.ui.notes.SearchScreen
 import com.flatnotes.android.ui.server.ServerAddressScreen
 import com.flatnotes.android.ui.server.ServerAddressViewModel
 import com.flatnotes.android.ui.server.ServerSetupScreen
@@ -32,6 +33,7 @@ object Routes {
     const val SYNC_SETTINGS = "sync_settings"
     const val THEME_SETTINGS = "theme_settings"
     const val SERVER_ADDRESS = "server_address"
+    const val SEARCH = "search"
 
     fun noteEditor(title: String) = "note_editor/$title"
 }
@@ -82,11 +84,8 @@ fun NavGraph(
                 onNavigateToSettings = {
                     navController.navigate(Routes.SETTINGS)
                 },
-                onLogout = {
-                    viewModel.logout()
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.NOTE_LIST) { inclusive = true }
-                    }
+                onNavigateToSearch = {
+                    navController.navigate(Routes.SEARCH)
                 }
             )
         }
@@ -120,7 +119,13 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToSync = { navController.navigate(Routes.SYNC_SETTINGS) },
                 onNavigateToTheme = { navController.navigate(Routes.THEME_SETTINGS) },
-                onNavigateToServerAddress = { navController.navigate(Routes.SERVER_ADDRESS) }
+                onNavigateToServerAddress = { navController.navigate(Routes.SERVER_ADDRESS) },
+                onLogout = {
+                    viewModel.logout()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.NOTE_LIST) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -145,6 +150,15 @@ fun NavGraph(
             ServerAddressScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.SEARCH) {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNoteClick = { title ->
+                    navController.navigate(Routes.noteEditor(title))
+                }
             )
         }
     }

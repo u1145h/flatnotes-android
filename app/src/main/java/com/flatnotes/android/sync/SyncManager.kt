@@ -91,6 +91,7 @@ class SyncManager(
             if (response.isSuccessful && response.body() != null) {
                 val remoteNotes = response.body()!!
                 for (remote in remoteNotes) {
+                    if (remote.title == "_flatnotes_config") continue
                     val localNote = noteDao.getNoteByTitle(remote.title)
                     if (localNote == null || (!localNote.isDirty && remote.lastModified > localNote.lastModified)) {
                         val detailResponse = api.getNote(remote.title)

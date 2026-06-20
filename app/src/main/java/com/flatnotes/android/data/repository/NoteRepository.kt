@@ -29,6 +29,7 @@ class NoteRepository(
                 val existingByTitle = existingNotes.associateBy { it.title }
 
                 for (result in response.body()!!) {
+                    if (result.title == "_flatnotes_config") continue
                     val existing = existingByTitle[result.title]
                     if (existing != null && existing.content.isNotBlank() && !existing.isDeleted) {
                         noteDao.upsertNote(

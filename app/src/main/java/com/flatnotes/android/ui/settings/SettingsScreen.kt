@@ -3,7 +3,7 @@ package com.flatnotes.android.ui.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
@@ -14,13 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-
-data class SettingsItem(
-    val icon: ImageVector,
-    val title: String,
-    val subtitle: String,
-    val onClick: () -> Unit
-)
+import com.flatnotes.android.ui.components.OneUiScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,26 +23,19 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToSync: () -> Unit,
     onNavigateToTheme: () -> Unit,
-    onNavigateToServerAddress: () -> Unit
+    onNavigateToServerAddress: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val serverUrl by viewModel.serverUrl.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    OneUiScaffold(
+        title = "Settings",
+        onBack = onNavigateBack
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = 8.dp)
         ) {
             SettingsItemRow(
                 icon = Icons.Default.Sync,
@@ -74,6 +61,31 @@ fun SettingsScreen(
                 subtitle = if (serverUrl.isNotBlank()) serverUrl else "Not configured",
                 onClick = onNavigateToServerAddress
             )
+
+            Spacer(Modifier.weight(1f))
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onLogout)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = "Logout",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
