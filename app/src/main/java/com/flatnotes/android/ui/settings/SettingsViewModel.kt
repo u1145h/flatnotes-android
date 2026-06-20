@@ -23,6 +23,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val amoledEnabled: StateFlow<Boolean> = settingsRepository.amoledEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val serverUrl: StateFlow<String> = settingsRepository.serverUrl
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    val pathPrefix: StateFlow<String> = settingsRepository.pathPrefix
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
     fun setSyncInterval(minutes: Long) {
         viewModelScope.launch {
             settingsRepository.saveSyncInterval(minutes)

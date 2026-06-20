@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
@@ -27,8 +28,11 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToSync: () -> Unit,
-    onNavigateToTheme: () -> Unit
+    onNavigateToTheme: () -> Unit,
+    onNavigateToServerAddress: () -> Unit
 ) {
+    val serverUrl by viewModel.serverUrl.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,6 +64,15 @@ fun SettingsScreen(
                 title = "Theme",
                 subtitle = "Customize app appearance",
                 onClick = onNavigateToTheme
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingsItemRow(
+                icon = Icons.Default.Cloud,
+                title = "Server Address",
+                subtitle = if (serverUrl.isNotBlank()) serverUrl else "Not configured",
+                onClick = onNavigateToServerAddress
             )
         }
     }

@@ -13,6 +13,8 @@ import com.flatnotes.android.ui.notes.NoteEditorScreen
 import com.flatnotes.android.ui.notes.NoteEditorViewModel
 import com.flatnotes.android.ui.notes.NoteListScreen
 import com.flatnotes.android.ui.notes.NoteListViewModel
+import com.flatnotes.android.ui.server.ServerAddressScreen
+import com.flatnotes.android.ui.server.ServerAddressViewModel
 import com.flatnotes.android.ui.server.ServerSetupScreen
 import com.flatnotes.android.ui.server.ServerSetupViewModel
 import com.flatnotes.android.ui.settings.SettingsScreen
@@ -29,6 +31,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val SYNC_SETTINGS = "sync_settings"
     const val THEME_SETTINGS = "theme_settings"
+    const val SERVER_ADDRESS = "server_address"
 
     fun noteEditor(title: String) = "note_editor/$title"
 }
@@ -56,7 +59,6 @@ fun NavGraph(
 
         composable(Routes.LOGIN) {
             val viewModel: LoginViewModel = viewModel()
-            // ViewModel has already been initialized in Application context
             LoginScreen(
                 viewModel = viewModel,
                 onLoggedIn = {
@@ -117,7 +119,8 @@ fun NavGraph(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToSync = { navController.navigate(Routes.SYNC_SETTINGS) },
-                onNavigateToTheme = { navController.navigate(Routes.THEME_SETTINGS) }
+                onNavigateToTheme = { navController.navigate(Routes.THEME_SETTINGS) },
+                onNavigateToServerAddress = { navController.navigate(Routes.SERVER_ADDRESS) }
             )
         }
 
@@ -132,6 +135,14 @@ fun NavGraph(
         composable(Routes.THEME_SETTINGS) {
             val viewModel: SettingsViewModel = viewModel()
             ThemeSettingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.SERVER_ADDRESS) {
+            val viewModel: ServerAddressViewModel = viewModel()
+            ServerAddressScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )

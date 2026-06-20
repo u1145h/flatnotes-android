@@ -4,14 +4,19 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -25,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +38,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.flatnotes.android.data.repository.SettingsRepository
+import com.flatnotes.android.ui.theme.FlatnotesTheme
 
 class QuickNoteCreationActivity : ComponentActivity() {
 
@@ -39,6 +48,17 @@ class QuickNoteCreationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val settingsRepo = remember { SettingsRepository(this@QuickNoteCreationActivity) }
+            val themeMode by settingsRepo.themeMode.collectAsState(initial = "system")
+            val amoledEnabled by settingsRepo.amoledEnabled.collectAsState(initial = false)
+
+            val darkTheme = when (themeMode) {
+                "light" -> false
+                "dark" -> true
+                else -> isSystemInDarkTheme()
+            }
+            val isAmoled = amoledEnabled && darkTheme
+
             val viewModel: QuickNoteCreationViewModel = viewModel()
             val uiState by viewModel.uiState.collectAsState()
 
@@ -54,21 +74,24 @@ class QuickNoteCreationActivity : ComponentActivity() {
                 }
             }
 
-            Surface(
-                modifier = Modifier
-                    .padding(32.dp)
-                    .widthIn(max = 480.dp),
+            FlatnotesTheme(darkTheme = darkTheme, isAmoled = isAmoled) {
+                Surface(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .widthIn(max = 480.dp),
                 color = Color.Transparent
             ) {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.5f),
+                    shape = RoundedCornerShape(14.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .padding(start = 13.dp, end = 13.dp, top = 10.dp, bottom = 10.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
                         BasicTextField(
@@ -99,12 +122,18 @@ class QuickNoteCreationActivity : ComponentActivity() {
                             }
                         )
 
-                        BasicTextField(
-                            value = uiState.content,
-                            onValueChange = viewModel::updateContent,
+                        Box(
                             modifier = Modifier
+                                .weight(1f)
                                 .fillMaxWidth()
-                                .height(180.dp),
+                        ) {
+                            val scrollState = rememberScrollState()
+                            BasicTextField(
+                                value = uiState.content,
+                                onValueChange = viewModel::updateContent,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(scrollState),
                             textStyle = MaterialTheme.typography.bodyLarge.copy(
                                 fontFamily = FontFamily.Monospace,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -125,6 +154,7 @@ class QuickNoteCreationActivity : ComponentActivity() {
                                 }
                             }
                         )
+                        }
 
                         if (viewModel.initError != null) {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -151,26 +181,32 @@ class QuickNoteCreationActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        Button(
-                            onClick = { viewModel.saveNote() },
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = !uiState.isSaving && viewModel.initError == null
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text(getString(com.flatnotes.android.R.string.quick_note_save))
-                        }
+                            OutlinedButton(
+                                onClick = { finish() },
+                                modifier = Modifier.weight(1f),
+                                enabled = !uiState.isSaving
+                            ) {
+                                Text(getString(com.flatnotes.android.R.string.quick_note_cancel))
+                            }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedButton(
-                            onClick = { finish() },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !uiState.isSaving
-                        ) {
-                            Text(getString(com.flatnotes.android.R.string.quick_note_cancel))
+                            Button(
+                                onClick = { viewModel.saveNote() },
+                                modifier = Modifier.weight(1f),
+                                enabled = !uiState.isSaving && viewModel.initError == null
+                            ) {
+                                Text(getString(com.flatnotes.android.R.string.quick_note_save))
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+
 }
