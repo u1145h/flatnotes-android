@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Flatnotes</string>
+    <string name="quick_note_tile_label">New Note</string>
+    <string name="quick_note_title_hint">Title</string>
+    <string name="quick_note_content_hint">Note content…</string>
+    <string name="quick_note_save">Save</string>
+    <string name="quick_note_cancel">Cancel</string>
+    <string name="quick_note_created">Note created</string>
+    <string name="quick_note_saved_offline">Saved offline</string>
+    <string name="quick_note_title_required">Title cannot be empty</string>
 </resources>
