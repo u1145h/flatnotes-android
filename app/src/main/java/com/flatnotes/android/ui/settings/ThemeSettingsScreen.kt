@@ -32,11 +32,9 @@ fun ThemeSettingsScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
-            Spacer(Modifier.height(8.dp))
-
             themeOptions.forEach { option ->
                 Row(
                     modifier = Modifier

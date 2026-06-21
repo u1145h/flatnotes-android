@@ -8,6 +8,7 @@ import com.flatnotes.android.data.api.TokenStorage
 import com.flatnotes.android.data.local.FlatnotesDatabase
 import com.flatnotes.android.data.repository.NoteRepository
 import com.flatnotes.android.util.NetworkResult
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -22,6 +23,7 @@ data class NoteEditorUiState(
     val saved: Boolean = false
 )
 
+@OptIn(FlowPreview::class)
 class NoteEditorViewModel(application: Application) : AndroidViewModel(application) {
 
     private val tokenStorage = TokenStorage(application)
@@ -38,6 +40,13 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
             tokenStorage
         )
         noteRepository = NoteRepository(api, dao)
+
+        viewModelScope.launch {
+            _uiState
+                .drop(1)
+                .debounce(1000L)
+                .collect { performAutoSave() }
+        }
     }
 
     fun loadNote(title: String) {
@@ -52,7 +61,8 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
                         title = local.title,
                         content = local.content,
                         originalTitle = local.title,
-                        isLoading = false
+                        isLoading = false,
+                        saved = true
                     )
                 }
                 return@launch
@@ -77,7 +87,8 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
                             title = note.title,
                             content = note.content ?: "",
                             originalTitle = note.title,
-                            isLoading = false
+                            isLoading = false,
+                            saved = true
                         )
                     }
                 }
@@ -88,12 +99,13 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
                                 title = local.title,
                                 content = local.content,
                                 originalTitle = local.title,
-                                isLoading = false
+                                isLoading = false,
+                                saved = true
                             )
                         }
                     } else {
                         _uiState.update {
-                            it.copy(isLoading = false, error = result.message)
+                            it.copy(isLoading = false, error = result.message, saved = true)
                         }
                     }
                 }
@@ -128,39 +140,61 @@ class NoteEditorViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.update { it.copy(error = "Title cannot be empty") }
             return
         }
+        viewModelScope.launch { saveInternal() }
+    }
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true, error = null) }
+    fun saveOnExit() {
+        val s = _uiState.value
+        if (s.title.isBlank()) return
+        if (s.saved) return
+        viewModelScope.launch { saveInternal() }
+    }
 
-            val result = if (state.isNewNote) {
-                noteRepository.createNote(state.title, state.content)
-            } else {
-                noteRepository.updateNote(
-                    state.originalTitle,
-                    state.content,
-                    if (state.title != state.originalTitle) state.title else null
-                )
-            }
+    private suspend fun performAutoSave() {
+        val s = _uiState.value
+        if (s.isNewNote) return
+        if (s.title.isBlank()) return
+        if (s.isSaving) return
+        if (s.saved) return
+        saveInternal()
+    }
 
-            when (result) {
-                is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isSaving = false,
-                            saved = true,
-                            isNewNote = false,
-                            originalTitle = result.data.title
-                        )
-                    }
+    private suspend fun saveInternal() {
+        val stateAtStart = _uiState.value
+        val contentAtStart = stateAtStart.content
+        val titleAtStart = stateAtStart.title
+        _uiState.update { it.copy(isSaving = true, error = null) }
+
+        val result = if (stateAtStart.isNewNote) {
+            noteRepository.createNote(stateAtStart.title, stateAtStart.content)
+        } else {
+            noteRepository.updateNote(
+                stateAtStart.originalTitle,
+                stateAtStart.content,
+                if (stateAtStart.title != stateAtStart.originalTitle) stateAtStart.title else null
+            )
+        }
+
+        when (result) {
+            is NetworkResult.Success -> {
+                val stateNow = _uiState.value
+                val hasNewerChanges = stateNow.content != contentAtStart || stateNow.title != titleAtStart
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        saved = !hasNewerChanges,
+                        isNewNote = false,
+                        originalTitle = result.data.title
+                    )
                 }
-                is NetworkResult.Error -> {
-                    noteRepository.saveLocalNote(state.title, state.content)
-                    _uiState.update {
-                        it.copy(isSaving = false, saved = true, error = "Saved offline: ${result.message}")
-                    }
-                }
-                else -> {}
             }
+            is NetworkResult.Error -> {
+                noteRepository.saveLocalNote(stateAtStart.title, stateAtStart.content)
+                _uiState.update {
+                    it.copy(isSaving = false, saved = true, error = "Saved offline: ${result.message}")
+                }
+            }
+            else -> {}
         }
     }
 

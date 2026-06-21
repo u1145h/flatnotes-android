@@ -3,9 +3,8 @@ package com.flatnotes.android.ui.notes.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.res.painterResource
+import com.composables.icons.lucide.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,7 +39,7 @@ fun NoteCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (isPinned) {
                     Icon(
-                        Icons.Default.Star,
+                        painterResource(R.drawable.lucide_ic_pin),
                         contentDescription = "Pinned",
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary
@@ -57,7 +56,7 @@ fun NoteCard(
                 if (note.isDirty) {
                     Spacer(Modifier.width(4.dp))
                     Icon(
-                        Icons.Default.CloudOff,
+                        painterResource(R.drawable.lucide_ic_cloud_off),
                         contentDescription = "Unsaved",
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.error

@@ -4,17 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flatnotes.android.ui.notes.components.NoteCard
 
@@ -38,7 +36,7 @@ fun SearchScreen(
                 title = { Text("Search") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(painterResource(R.drawable.lucide_ic_chevron_left), contentDescription = "Back")
                     }
                 }
             )
@@ -54,11 +52,11 @@ fun SearchScreen(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::search,
                 placeholder = { Text("Search notes...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                leadingIcon = { Icon(painterResource(R.drawable.lucide_ic_search), contentDescription = null) },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.search("") }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                            Icon(painterResource(R.drawable.lucide_ic_x), contentDescription = "Clear")
                         }
                     }
                 },

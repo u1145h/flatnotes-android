@@ -2,9 +2,8 @@ package com.flatnotes.android.ui.server
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.res.painterResource
+import com.composables.icons.lucide.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,19 +32,17 @@ fun ServerAddressScreen(
         actions = {
             if (uiState.connectionSuccess) {
                 IconButton(onClick = viewModel::saveAndExit) {
-                    Icon(Icons.Default.Check, contentDescription = "Save")
+                    Icon(painterResource(R.drawable.lucide_ic_check), contentDescription = "Save")
                 }
             }
         }
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(Modifier.height(8.dp))
-
             OutlinedTextField(
                 value = uiState.serverUrl,
                 onValueChange = viewModel::updateServerUrl,
@@ -55,7 +52,7 @@ fun ServerAddressScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 singleLine = true,
                 leadingIcon = {
-                    Icon(Icons.Default.Settings, contentDescription = null)
+                    Icon(painterResource(R.drawable.lucide_ic_settings), contentDescription = null)
                 }
             )
 

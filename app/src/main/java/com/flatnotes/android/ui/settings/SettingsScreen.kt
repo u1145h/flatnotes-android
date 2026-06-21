@@ -2,18 +2,13 @@ package com.flatnotes.android.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.R
 import com.flatnotes.android.ui.components.OneUiScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,11 +29,11 @@ fun SettingsScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             SettingsItemRow(
-                icon = Icons.Default.Sync,
+                icon = R.drawable.lucide_ic_refresh_cw,
                 title = "Sync Interval",
                 subtitle = "How often notes sync to the server",
                 onClick = onNavigateToSync
@@ -47,7 +42,7 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsItemRow(
-                icon = Icons.Default.DarkMode,
+                icon = R.drawable.lucide_ic_moon,
                 title = "Theme",
                 subtitle = "Customize app appearance",
                 onClick = onNavigateToTheme
@@ -56,13 +51,11 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsItemRow(
-                icon = Icons.Default.Cloud,
+                icon = R.drawable.lucide_ic_cloud,
                 title = "Server Address",
                 subtitle = if (serverUrl.isNotBlank()) serverUrl else "Not configured",
                 onClick = onNavigateToServerAddress
             )
-
-            Spacer(Modifier.weight(1f))
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
@@ -74,7 +67,7 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    painter = painterResource(R.drawable.lucide_ic_log_out),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(24.dp)
@@ -92,7 +85,7 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsItemRow(
-    icon: ImageVector,
+    icon: Int,
     title: String,
     subtitle: String,
     onClick: () -> Unit
@@ -105,7 +98,7 @@ private fun SettingsItemRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = icon,
+            painter = painterResource(icon),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)
@@ -123,7 +116,7 @@ private fun SettingsItemRow(
             )
         }
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            painter = painterResource(R.drawable.lucide_ic_chevron_right),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         )

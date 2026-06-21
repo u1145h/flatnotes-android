@@ -1,13 +1,16 @@
 package com.flatnotes.android.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.R
 
 @Composable
 fun OneUiScaffold(
@@ -17,53 +20,36 @@ fun OneUiScaffold(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val topFraction = if (maxWidth > maxHeight) 0.25f else 0.4f
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(topFraction)
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp)
-            ) {
-                if (showBackButton) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.align(Alignment.TopStart)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (showBackButton) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painterResource(R.drawable.lucide_ic_chevron_left),
+                        contentDescription = "Back"
+                    )
                 }
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(end = 4.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    actions()
-                }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 24.dp, end = 24.dp)
-                )
             }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                content()
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            actions()
         }
+
+        content()
     }
 }

@@ -2,9 +2,8 @@ package com.flatnotes.android.ui.server
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.res.painterResource
+import com.composables.icons.lucide.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +29,7 @@ fun ServerSetupScreen(
                             viewModel.saveSettings()
                             onConnected()
                         }) {
-                            Icon(Icons.Default.Check, contentDescription = "Continue")
+                            Icon(painterResource(R.drawable.lucide_ic_check), contentDescription = "Continue")
                         }
                     }
                 }
@@ -58,7 +57,7 @@ fun ServerSetupScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 singleLine = true,
                 leadingIcon = {
-                    Icon(Icons.Default.Settings, contentDescription = null)
+                    Icon(painterResource(R.drawable.lucide_ic_settings), contentDescription = null)
                 }
             )
 

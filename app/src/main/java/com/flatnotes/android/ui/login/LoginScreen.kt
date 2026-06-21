@@ -2,9 +2,8 @@ package com.flatnotes.android.ui.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.res.painterResource
+import com.composables.icons.lucide.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -56,7 +55,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 leadingIcon = {
-                    Icon(Icons.Default.Person, contentDescription = null)
+                    Icon(painterResource(R.drawable.lucide_ic_user), contentDescription = null)
                 }
             )
 
@@ -68,7 +67,7 @@ fun LoginScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 leadingIcon = {
-                    Icon(Icons.Default.Lock, contentDescription = null)
+                    Icon(painterResource(R.drawable.lucide_ic_lock), contentDescription = null)
                 }
             )
 

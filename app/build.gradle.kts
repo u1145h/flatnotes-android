@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.flatnotes.android"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.flatnotes.android"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
 
@@ -54,9 +54,15 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx) {
+        version { strictly(libs.versions.lifecycleRuntimeKtx.get()) }
+    }
+    implementation(libs.androidx.lifecycle.runtime.compose) {
+        version { strictly(libs.versions.lifecycleRuntimeKtx.get()) }
+    }
+    implementation(libs.androidx.lifecycle.viewmodel.compose) {
+        version { strictly(libs.versions.lifecycleRuntimeKtx.get()) }
+    }
     implementation(libs.androidx.activity.compose)
 
     implementation(platform(libs.androidx.compose.bom))
@@ -64,7 +70,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.room.runtime)
@@ -84,7 +89,18 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
-    implementation("com.github.jeziellago:compose-markdown:0.7.0")
+    implementation("com.github.jeziellago:compose-markdown:0.7.0") {
+        exclude(group = "androidx.compose.ui")
+        exclude(group = "androidx.compose.foundation")
+        exclude(group = "androidx.compose.material3")
+        exclude(group = "androidx.compose.material")
+        exclude(group = "androidx.compose.animation")
+        exclude(group = "androidx.compose.runtime")
+    }
+    implementation(libs.icons.lucide.android) {
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        exclude(group = "androidx.compose.foundation")
+    }
 
     debugImplementation(libs.androidx.ui.tooling)
 }

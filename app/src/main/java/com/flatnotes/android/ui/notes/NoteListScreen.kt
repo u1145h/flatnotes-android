@@ -6,13 +6,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NoteAdd
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.res.painterResource
+import com.composables.icons.lucide.R
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -64,7 +59,7 @@ fun NoteListScreen(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
-                    .width(250.dp)
+                    .width(300.dp)
                     .fillMaxHeight()
             ) {
                 Column(
@@ -79,7 +74,7 @@ fun NoteListScreen(
                 HorizontalDivider()
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.NoteAdd, contentDescription = null) },
+                    icon = { Icon(painterResource(R.drawable.lucide_ic_sticky_note), contentDescription = null) },
                     label = { Text("All Notes") },
                     selected = true,
                     onClick = {
@@ -92,7 +87,7 @@ fun NoteListScreen(
                 HorizontalDivider()
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    icon = { Icon(painterResource(R.drawable.lucide_ic_settings), contentDescription = null) },
                     label = { Text("Settings") },
                     selected = false,
                     onClick = {
@@ -105,228 +100,205 @@ fun NoteListScreen(
             }
         }
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val topFraction = if (maxWidth > maxHeight) 0.25f else 0.4f
-
-            Column(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(topFraction),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Notes",
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.Normal
-                        )
-                    )
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .nestedScroll(pullToRefreshState.nestedScrollConnection)
+        ) {
+            val columns = when {
+                    maxWidth <= 550.dp -> 2
+                    maxWidth <= 800.dp -> 3
+                    else -> 4
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(pullToRefreshState.nestedScrollConnection)
-                    ) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            Spacer(Modifier.height(52.dp))
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (uiState.isSyncing) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
 
-                            if (uiState.isSyncing) {
-                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    uiState.syncResult?.let { result ->
+                        Snackbar(
+                            modifier = Modifier.padding(8.dp),
+                            action = {
+                                TextButton(onClick = viewModel::clearSyncResult) {
+                                    Text("Dismiss")
+                                }
                             }
+                        ) {
+                            Text(result)
+                        }
+                    }
 
-                            uiState.syncResult?.let { result ->
-                                Snackbar(
-                                    modifier = Modifier.padding(8.dp),
-                                    action = {
-                                        TextButton(onClick = viewModel::clearSyncResult) {
-                                            Text("Dismiss")
+                    uiState.error?.let { error ->
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = error,
+                                modifier = Modifier.padding(12.dp),
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+
+                    if (uiState.notes.isEmpty() && !uiState.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painterResource(R.drawable.lucide_ic_file_plus),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(16.dp))
+                                Text(
+                                    "No notes yet",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    "Tap + to create one",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        Box(modifier = Modifier.weight(1f)) {
+                            LazyVerticalStaggeredGrid(
+                                columns = StaggeredGridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalItemSpacing = 8.dp
+                            ) {
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        IconButton(onClick = {
+                                            scope.launch { drawerState.open() }
+                                        }) {
+                                            Icon(painterResource(R.drawable.lucide_ic_menu), contentDescription = "Open menu")
+                                        }
+                                        Text(
+                                            text = "Notes",
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(onClick = onNavigateToSearch) {
+                                            Icon(painterResource(R.drawable.lucide_ic_search), contentDescription = "Search")
                                         }
                                     }
-                                ) {
-                                    Text(result)
                                 }
-                            }
 
-                            uiState.error?.let { error ->
-                                Card(
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer
-                                    ),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = error,
-                                        modifier = Modifier.padding(12.dp),
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                }
-                            }
-
-                            if (uiState.notes.isEmpty() && !uiState.isLoading) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            Icons.AutoMirrored.Filled.NoteAdd,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(64.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                items(pinnedNotes, key = { it.title }) { note ->
+                                    var showMenu by remember { mutableStateOf(false) }
+                                    Box {
+                                        NoteCard(
+                                            note = note,
+                                            isPinned = true,
+                                            onClick = { onNoteClick(note.title) },
+                                            onLongClick = { showMenu = true }
                                         )
-                                        Spacer(Modifier.height(16.dp))
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text("Unpin") },
+                                                onClick = {
+                                                    showMenu = false
+                                                    viewModel.togglePin(note.title)
+                                                },
+                                                leadingIcon = {
+                                                    Icon(painterResource(R.drawable.lucide_ic_pin), contentDescription = null)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (pinnedNotes.isNotEmpty()) {
+                                    item(span = StaggeredGridItemSpan.FullLine) {
                                         Text(
-                                            "No notes yet",
+                                            "All Notes",
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 12.dp),
+                                            textAlign = TextAlign.Center,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
-                                        Text(
-                                            "Tap + to create one",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
+                                }
+
+                                items(unpinnedNotes, key = { it.title }) { note ->
+                                    var showMenu by remember { mutableStateOf(false) }
+                                    Box {
+                                        NoteCard(
+                                            note = note,
+                                            isPinned = false,
+                                            onClick = { onNoteClick(note.title) },
+                                            onLongClick = { showMenu = true }
                                         )
-                                    }
-                                }
-                            } else {
-                                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                    val columns = when {
-                                        maxWidth <= 550.dp -> 2
-                                        maxWidth <= 800.dp -> 3
-                                        else -> 4
-                                    }
-
-                                    LazyVerticalStaggeredGrid(
-                                        columns = StaggeredGridCells.Fixed(columns),
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentPadding = PaddingValues(8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalItemSpacing = 8.dp
-                                    ) {
-                                        items(pinnedNotes, key = { it.title }) { note ->
-                                            var showMenu by remember { mutableStateOf(false) }
-                                            Box {
-                                                NoteCard(
-                                                    note = note,
-                                                    isPinned = true,
-                                                    onClick = { onNoteClick(note.title) },
-                                                    onLongClick = { showMenu = true }
-                                                )
-                                                DropdownMenu(
-                                                    expanded = showMenu,
-                                                    onDismissRequest = { showMenu = false }
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = { Text("Unpin") },
-                                                        onClick = {
-                                                            showMenu = false
-                                                            viewModel.togglePin(note.title)
-                                                        },
-                                                        leadingIcon = {
-                                                            Icon(Icons.Default.Star, contentDescription = null)
-                                                        }
-                                                    )
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text("Pin") },
+                                                onClick = {
+                                                    showMenu = false
+                                                    viewModel.togglePin(note.title)
+                                                },
+                                                leadingIcon = {
+                                                    Icon(painterResource(R.drawable.lucide_ic_pin), contentDescription = null)
                                                 }
-                                            }
-                                        }
-
-                                        if (pinnedNotes.isNotEmpty()) {
-                                            item(span = StaggeredGridItemSpan.FullLine) {
-                                                Text(
-                                                    "All Notes",
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(vertical = 12.dp),
-                                                    textAlign = TextAlign.Center,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-
-                                        items(unpinnedNotes, key = { it.title }) { note ->
-                                            var showMenu by remember { mutableStateOf(false) }
-                                            Box {
-                                                NoteCard(
-                                                    note = note,
-                                                    isPinned = false,
-                                                    onClick = { onNoteClick(note.title) },
-                                                    onLongClick = { showMenu = true }
-                                                )
-                                                DropdownMenu(
-                                                    expanded = showMenu,
-                                                    onDismissRequest = { showMenu = false }
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = { Text("Pin") },
-                                                        onClick = {
-                                                            showMenu = false
-                                                            viewModel.togglePin(note.title)
-                                                        },
-                                                        leadingIcon = {
-                                                            Icon(Icons.Default.Star, contentDescription = null)
-                                                        }
-                                                    )
-                                                }
-                                            }
+                                            )
                                         }
                                     }
                                 }
-                            }
-                        }
-
-                        if (showPullIndicator) {
-                            PullToRefreshContainer(
-                                state = pullToRefreshState,
-                                modifier = Modifier.align(Alignment.TopCenter)
-                            )
-                        }
-
-                        FloatingActionButton(
-                            onClick = onCreateNote,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp)
-                                .size(66.dp),
-                            shape = CircleShape
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Create note",
-                                modifier = Modifier.size(35.dp)
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(Modifier.padding(start = 8.dp)) {
-                            IconButton(onClick = {
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Open menu")
-                            }
-                        }
-                        Row(Modifier.padding(end = 8.dp)) {
-                            IconButton(onClick = onNavigateToSearch) {
-                                Icon(Icons.Default.Search, contentDescription = "Search")
                             }
                         }
                     }
                 }
+
+                if (showPullIndicator) {
+                    PullToRefreshContainer(
+                        state = pullToRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+
+                FloatingActionButton(
+                    onClick = onCreateNote,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                        .size(66.dp),
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        painterResource(R.drawable.lucide_ic_plus),
+                        contentDescription = "Create note",
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
             }
-        }
     }
 }

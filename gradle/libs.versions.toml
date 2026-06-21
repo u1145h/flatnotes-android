@@ -1,8 +1,8 @@
 [versions]
-agp = "8.2.2"
+agp = "8.7.3"
 kotlin = "1.9.22"
 coreKtx = "1.12.0"
-lifecycleRuntimeKtx = "2.7.0"
+lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.8.2"
 composeBom = "2024.02.00"
 composeCompiler = "1.5.10"
@@ -29,7 +29,6 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -44,6 +43,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 moshi = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+icons-lucide-android = { group = "com.composables", name = "icons-lucide-android", version = "2.2.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
